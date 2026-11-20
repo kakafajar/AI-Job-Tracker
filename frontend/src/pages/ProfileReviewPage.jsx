@@ -1,0 +1,215 @@
+import { useState } from 'react'
+import { useApp } from '../context/AppContext'
+import { StepProgress } from '../components/StepProgress'
+
+export function ProfileReviewPage() {
+  const { extractedProfile, addSkill, removeSkill, setActiveView } = useApp()
+  const [newSkillInput, setNewSkillInput] = useState('')
+  const [inputError, setInputError] = useState('')
+
+  // Fallback profile if user refreshed directly into review step
+  const profile = extractedProfile || {
+    matchedRole: 'Frontend Web Developer',
+    experienceLevel: '1 - 3 Tahun Pengalaman',
+    experienceSummary: 'Pengalaman membangun aplikasi web responsif menggunakan React dan integrasi REST API.',
+    skills: ['React', 'JavaScript', 'HTML/CSS', 'Tailwind CSS', 'Git', 'REST API']
+  }
+
+  const handleAddSkill = (e) => {
+    e.preventDefault()
+    const trimmed = newSkillInput.trim()
+    if (!trimmed) {
+      setInputError('Ketik nama skill terlebih dahulu.')
+      return
+    }
+
+    if (profile.skills.includes(trimmed)) {
+      setInputError('Skill ini sudah ada di dalam daftar.')
+      return
+    }
+
+    addSkill(trimmed)
+    setNewSkillInput('')
+    setInputError('')
+  }
+
+  return (
+    <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+      <StepProgress />
+
+      <div className="card">
+        <div className="card-header">
+          <h1 className="card-title">3. Tinjau Hasil Ekstraksi Profil</h1>
+          <p className="card-subtitle">
+            Tinjau hasil pembacaan keahlian dari CV Anda. Anda dapat menambah atau mengurangi skill sebelum sistem mencari lowongan yang cocok.
+          </p>
+        </div>
+
+        {/* Clear disclaimer regarding simulation */}
+        <div className="info-banner info-banner-warning">
+          <span style={{ fontSize: '18px' }} aria-hidden="true">ℹ️</span>
+          <div>
+            <strong>Mode Simulasi Frontend:</strong> Hasil ekstraksi posisi dan skill berikut merupakan simulasi data contoh hingga modul backend AI Laravel terhubung secara menyeluruh.
+          </div>
+        </div>
+
+        {/* Extracted Role & Experience Summary */}
+        <div
+          style={{
+            backgroundColor: 'var(--color-surface-muted)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius-md)',
+            padding: '20px',
+            marginBottom: '24px'
+          }}
+        >
+          <div style={{ marginBottom: '16px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+              Rekomendasi Posisi yang Cocok
+            </span>
+            <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-primary)', marginTop: '4px' }}>
+              {profile.matchedRole}
+            </h2>
+          </div>
+
+          <div style={{ marginBottom: '12px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+              Estimasi Pengalaman
+            </span>
+            <p style={{ fontSize: '14px', fontWeight: 600, color: 'var(--color-text)', marginTop: '2px' }}>
+              {profile.experienceLevel}
+            </p>
+          </div>
+
+          <div>
+            <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--color-text-subtle)', textTransform: 'uppercase', letterSpacing: '0.4px' }}>
+              Ringkasan Kualifikasi
+            </span>
+            <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', marginTop: '4px', lineHeight: 1.5 }}>
+              {profile.experienceSummary}
+            </p>
+          </div>
+        </div>
+
+        {/* Editable Skills Section */}
+        <div className="form-group">
+          <label className="form-label" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Daftar Keahlian / Skill ({profile.skills.length})</span>
+            <span style={{ fontSize: '12px', fontWeight: 400, color: 'var(--color-text-subtle)' }}>
+              Klik tanda silang untuk menghapus
+            </span>
+          </label>
+
+          {/* Skill tags with remove button */}
+          <div
+            style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              gap: '8px',
+              padding: '14px',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius-md)',
+              backgroundColor: 'var(--color-surface)',
+              minHeight: '60px',
+              marginBottom: '14px'
+            }}
+            role="list"
+            aria-label="Daftar keahlian yang diekstraksi"
+          >
+            {profile.skills.map((skill) => (
+              <span
+                key={skill}
+                className="skill-tag"
+                style={{
+                  padding: '5px 10px',
+                  fontSize: '13px',
+                  backgroundColor: 'var(--color-primary-light)',
+                  borderColor: 'var(--color-primary-border)',
+                  color: 'var(--color-primary)',
+                  fontWeight: 500
+                }}
+                role="listitem"
+              >
+                <span>{skill}</span>
+                <button
+                  type="button"
+                  onClick={() => removeSkill(skill)}
+                  aria-label={`Hapus skill ${skill}`}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    width: '18px',
+                    height: '18px',
+                    borderRadius: '50%',
+                    marginLeft: '4px',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    color: 'var(--color-primary)',
+                    backgroundColor: 'transparent'
+                  }}
+                >
+                  ✕
+                </button>
+              </span>
+            ))}
+          </div>
+
+          {/* Add custom skill input */}
+          <form onSubmit={handleAddSkill} style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ flex: 1 }}>
+              <input
+                type="text"
+                className="input-text"
+                placeholder="Tambah keahlian baru (contoh: TypeScript, Next.js, Redux)"
+                value={newSkillInput}
+                onChange={(e) => {
+                  setNewSkillInput(e.target.value)
+                  setInputError('')
+                }}
+                aria-label="Nama keahlian baru"
+              />
+            </div>
+            <button type="submit" className="btn btn-secondary" style={{ flexShrink: 0 }}>
+              + Tambah Skill
+            </button>
+          </form>
+          {inputError && (
+            <p style={{ color: 'var(--status-rejected-text)', fontSize: '12px', marginTop: '6px' }}>
+              {inputError}
+            </p>
+          )}
+        </div>
+
+        {/* Bottom Actions */}
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            marginTop: '32px',
+            paddingTop: '20px',
+            borderTop: '1px solid var(--color-border)'
+          }}
+        >
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setActiveView('upload')}
+          >
+            ← Ganti File CV
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => setActiveView('recommendations')}
+          >
+            Cari Rekomendasi Lowongan →
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
