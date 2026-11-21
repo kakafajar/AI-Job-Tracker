@@ -41,7 +41,7 @@ export function PreferencesPage() {
   }
 
   return (
-    <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+    <div style={{ width: '100%' }}>
       <StepProgress />
 
       <div className="card">
@@ -54,7 +54,6 @@ export function PreferencesPage() {
 
         {errorMessage && (
           <div className="info-banner info-banner-danger" role="alert">
-            <span>⚠️</span>
             <span>{errorMessage}</span>
           </div>
         )}
@@ -183,15 +182,16 @@ export function PreferencesPage() {
               gap: '12px',
               marginTop: '32px',
               paddingTop: '20px',
-              borderTop: '1px solid var(--color-border)'
+              borderTop: '1px solid var(--color-border)',
+              flexWrap: 'wrap'
             }}
           >
             <button
               type="button"
               className="btn btn-secondary"
-              onClick={() => setActiveView('landing')}
+              onClick={() => setActiveView('dashboard')}
             >
-              ← Kembali
+              ← Kembali ke Dashboard
             </button>
 
             <button type="submit" className="btn btn-primary">

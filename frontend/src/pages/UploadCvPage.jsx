@@ -141,28 +141,19 @@ export function UploadCvPage() {
   }
 
   return (
-    <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+    <div style={{ width: '100%' }}>
       <StepProgress />
 
       <div className="card">
         <div className="card-header">
-          <h1 className="card-title">2. Unggah CV Anda</h1>
+          <h1 className="card-title">Unggah CV</h1>
           <p className="card-subtitle">
-            Unggah resume dalam format PDF atau DOCX dengan ukuran maksimal 5 MB untuk dianalisis profil dan keahliannya.
+            Format PDF atau DOCX dengan ukuran maksimal 5 MB.
           </p>
-        </div>
-
-        {/* Security / Privacy notice */}
-        <div className="info-banner info-banner-primary">
-          <span style={{ fontSize: '18px' }} aria-hidden="true">🔒</span>
-          <div>
-            <strong>Privasi & Keamanan:</strong> File Anda hanya diproses di browser lokal untuk tahap simulasi ini. File tidak dikirimkan ke server eksternal apa pun.
-          </div>
         </div>
 
         {errorMessage && (
           <div className="info-banner info-banner-danger" role="alert">
-            <span>⚠️</span>
             <span>{errorMessage}</span>
           </div>
         )}
@@ -193,8 +184,26 @@ export function UploadCvPage() {
               }}
               aria-label="Area unggah CV. Klik atau seret file PDF atau DOCX ke sini."
             >
-              <div style={{ fontSize: '36px', marginBottom: '10px' }} aria-hidden="true">
-                📄
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
+                <div
+                  style={{
+                    width: '48px',
+                    height: '48px',
+                    borderRadius: '50%',
+                    backgroundColor: 'var(--color-primary-light)',
+                    color: 'var(--color-primary)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                  aria-hidden="true"
+                >
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                    <polyline points="17 8 12 3 7 8" />
+                    <line x1="12" y1="3" x2="12" y2="15" />
+                  </svg>
+                </div>
               </div>
               <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--color-text)', marginBottom: '4px' }}>
                 Tarik & lepaskan file CV di sini, atau klik untuk memilih
@@ -252,12 +261,11 @@ export function UploadCvPage() {
                   color: 'var(--color-primary)',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '20px'
+                  justifyContent: 'center'
                 }}
                 aria-hidden="true"
               >
-                📄
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
               </div>
               <div>
                 <p style={{ fontWeight: 600, fontSize: '15px', color: 'var(--color-text)' }}>
@@ -307,7 +315,8 @@ export function UploadCvPage() {
             gap: '12px',
             marginTop: '32px',
             paddingTop: '20px',
-            borderTop: '1px solid var(--color-border)'
+            borderTop: '1px solid var(--color-border)',
+            flexWrap: 'wrap'
           }}
         >
           <button

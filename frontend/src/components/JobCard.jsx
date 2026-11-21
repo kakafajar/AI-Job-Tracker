@@ -49,19 +49,23 @@ export function JobCard({ job, isTrackerView = false }) {
       {/* Metadata info */}
       <div className="job-meta-row">
         <span className="job-meta-item">
-          📍 {job.location}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          {job.location}
         </span>
         <span className="job-meta-item">
-          💼 {job.jobType}
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          {job.jobType}
         </span>
         {job.salaryRange && (
           <span className="job-meta-item">
-            💰 {job.salaryRange}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            {job.salaryRange}
           </span>
         )}
         {job.postedDate && (
           <span className="job-meta-item">
-            🕒 Dipasang {job.postedDate}
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            {job.postedDate}
           </span>
         )}
       </div>
@@ -93,7 +97,7 @@ export function JobCard({ job, isTrackerView = false }) {
       {/* Footer actions */}
       <div className="job-card-footer">
         <div className="job-source-tag">
-          Sumber: <strong>{job.source}</strong> (Tautan Asli)
+          {job.source}
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>

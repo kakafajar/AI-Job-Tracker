@@ -80,7 +80,7 @@ export function JobTrackerPage() {
   }
 
   return (
-    <div style={{ maxWidth: '880px', margin: '0 auto' }}>
+    <div style={{ width: '100%' }}>
       {/* Top Header */}
       <div
         style={{
@@ -101,7 +101,7 @@ export function JobTrackerPage() {
           </p>
         </div>
 
-        <div style={{ display: 'flex', gap: '10px' }}>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
           <button
             type="button"
             className="btn btn-secondary"
@@ -129,7 +129,6 @@ export function JobTrackerPage() {
 
           {manualError && (
             <div className="info-banner info-banner-danger" style={{ marginBottom: '14px' }}>
-              <span>⚠️</span>
               <span>{manualError}</span>
             </div>
           )}
@@ -285,11 +284,10 @@ export function JobTrackerPage() {
       {/* Empty State: No jobs saved at all */}
       {trackedJobs.length === 0 ? (
         <div className="state-box">
-          <div style={{ fontSize: '42px' }} aria-hidden="true">📋</div>
           <div>
-            <h2 className="state-title">Belum Ada Lowongan di Job Tracker</h2>
+            <h2 className="state-title">Belum Ada Lowongan Tersimpan</h2>
             <p className="state-desc">
-              Anda belum menyimpan lowongan kerja apa pun. Cari rekomendasi lowongan berdasarkan preferensi dan CV Anda untuk mulai memantau.
+              Simpan lowongan dari halaman Rekomendasi atau tambahkan secara manual untuk mulai memantau lamaran Anda.
             </p>
           </div>
           <button
@@ -303,8 +301,7 @@ export function JobTrackerPage() {
       ) : filteredJobs.length === 0 ? (
         /* Empty State: No jobs matching selected status filter */
         <div className="state-box">
-          <div style={{ fontSize: '36px' }} aria-hidden="true">🔍</div>
-          <div>
+            <div>
             <h2 className="state-title">Tidak Ada Lowongan Berstatus "{selectedStatusFilter}"</h2>
             <p className="state-desc">
               Saat ini belum ada data lowongan kerja dengan status tersebut.

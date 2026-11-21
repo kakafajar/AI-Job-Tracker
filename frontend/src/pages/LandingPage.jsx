@@ -32,15 +32,11 @@ export function LandingPage() {
         </p>
 
         {/* Honest note about application scope */}
-        <div
-          className="info-banner info-banner-primary"
-          style={{ maxWidth: '640px', margin: '0 auto 32px', textAlign: 'left' }}
+        <p
+          style={{ fontSize: '14px', color: 'var(--color-text-subtle)', maxWidth: '560px', margin: '0 auto 32px' }}
         >
-          <span style={{ fontSize: '18px' }} aria-hidden="true">💡</span>
-          <div>
-            <strong>Catatan:</strong> Aplikasi ini dirancang untuk pencari kerja individu, bukan portal pasang lowongan bagi perusahaan. Data rekomendasi dianalisis dari kesesuaian skill CV Anda.
-          </div>
-        </div>
+          Dirancang untuk pencari kerja individu. Data rekomendasi dianalisis dari kesesuaian skill CV Anda.
+        </p>
 
         {/* Primary CTA Buttons */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '14px', flexWrap: 'wrap' }}>

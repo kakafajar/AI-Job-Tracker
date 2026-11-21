@@ -12,8 +12,42 @@ export const TRACKING_STATUSES = [
 ]
 
 export function AppProvider({ children }) {
-  // Navigation view state
-  const [activeView, setActiveView] = useState('landing')
+  // Navigation view state: default to modern dashboard
+  const [activeView, setActiveViewState] = useState('dashboard')
+
+  // Sidebar toggle state for desktop expanded mode (icons + labels)
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false)
+
+  // Mobile menu drawer toggle state
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  const toggleSidebarExpanded = () => {
+    setIsSidebarExpanded((prev) => !prev)
+  }
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen((prev) => !prev)
+  }
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false)
+  }
+
+  const setActiveView = (view) => {
+    setActiveViewState(view)
+    setIsMobileMenuOpen(false)
+  }
+
+  // Automatically reset mobile drawer if viewport width expands to desktop
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setIsMobileMenuOpen(false)
+      }
+    }
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Step 2: Job search preferences
   const [preferences, setPreferencesState] = useState(() => {
@@ -140,6 +174,11 @@ export function AppProvider({ children }) {
       value={{
         activeView,
         setActiveView,
+        isSidebarExpanded,
+        toggleSidebarExpanded,
+        isMobileMenuOpen,
+        toggleMobileMenu,
+        closeMobileMenu,
         preferences,
         updatePreferences,
         cvFile,

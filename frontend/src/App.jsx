@@ -1,18 +1,21 @@
 import { AppProvider, useApp } from './context/AppContext'
-import { HeaderNav } from './components/HeaderNav'
-import { Footer } from './components/Footer'
-import { LandingPage } from './pages/LandingPage'
+import { Sidebar } from './components/Sidebar'
+import { TopHeader } from './components/TopHeader'
+import { DashboardOverview } from './pages/DashboardOverview'
 import { PreferencesPage } from './pages/PreferencesPage'
 import { UploadCvPage } from './pages/UploadCvPage'
 import { ProfileReviewPage } from './pages/ProfileReviewPage'
 import { RecommendationsPage } from './pages/RecommendationsPage'
 import { JobTrackerPage } from './pages/JobTrackerPage'
+import { LandingPage } from './pages/LandingPage'
 
-function AppViewRouter() {
+function AppLayout() {
   const { activeView } = useApp()
 
   const renderActiveView = () => {
     switch (activeView) {
+      case 'dashboard':
+        return <DashboardOverview />
       case 'preferences':
         return <PreferencesPage />
       case 'upload':
@@ -24,18 +27,22 @@ function AppViewRouter() {
       case 'tracker':
         return <JobTrackerPage />
       case 'landing':
-      default:
         return <LandingPage />
+      default:
+        return <DashboardOverview />
     }
   }
 
   return (
-    <div className="app-shell">
-      <HeaderNav />
-      <main className="main-content" id="main-content">
+    <div className="dashboard-layout">
+      {/* Floating Island Sidebar matching reference */}
+      <Sidebar />
+
+      {/* Main Dashboard Canvas */}
+      <main className="dashboard-main" id="main-content">
+        <TopHeader />
         {renderActiveView()}
       </main>
-      <Footer />
     </div>
   )
 }
@@ -43,7 +50,7 @@ function AppViewRouter() {
 export default function App() {
   return (
     <AppProvider>
-      <AppViewRouter />
+      <AppLayout />
     </AppProvider>
   )
 }

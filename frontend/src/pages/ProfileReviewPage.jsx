@@ -34,23 +34,15 @@ export function ProfileReviewPage() {
   }
 
   return (
-    <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+    <div style={{ width: '100%' }}>
       <StepProgress />
 
       <div className="card">
         <div className="card-header">
-          <h1 className="card-title">3. Tinjau Hasil Ekstraksi Profil</h1>
+          <h1 className="card-title">Tinjau Profil</h1>
           <p className="card-subtitle">
-            Tinjau hasil pembacaan keahlian dari CV Anda. Anda dapat menambah atau mengurangi skill sebelum sistem mencari lowongan yang cocok.
+            Periksa dan sesuaikan daftar keahlian yang diekstraksi dari CV Anda.
           </p>
-        </div>
-
-        {/* Clear disclaimer regarding simulation */}
-        <div className="info-banner info-banner-warning">
-          <span style={{ fontSize: '18px' }} aria-hidden="true">ℹ️</span>
-          <div>
-            <strong>Mode Simulasi Frontend:</strong> Hasil ekstraksi posisi dan skill berikut merupakan simulasi data contoh hingga modul backend AI Laravel terhubung secara menyeluruh.
-          </div>
         </div>
 
         {/* Extracted Role & Experience Summary */}
@@ -156,8 +148,8 @@ export function ProfileReviewPage() {
           </div>
 
           {/* Add custom skill input */}
-          <form onSubmit={handleAddSkill} style={{ display: 'flex', gap: '8px' }}>
-            <div style={{ flex: 1 }}>
+          <form onSubmit={handleAddSkill} style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ flex: '1 1 200px' }}>
               <input
                 type="text"
                 className="input-text"
@@ -190,7 +182,8 @@ export function ProfileReviewPage() {
             gap: '12px',
             marginTop: '32px',
             paddingTop: '20px',
-            borderTop: '1px solid var(--color-border)'
+            borderTop: '1px solid var(--color-border)',
+            flexWrap: 'wrap'
           }}
         >
           <button
