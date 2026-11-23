@@ -1,5 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { storageService } from '../services/storageService'
+import { apiClient } from '../services/apiClient'
+import { authService } from '../services/authService'
 
 const AppContext = createContext(null)
 
@@ -20,6 +22,114 @@ export function AppProvider({ children }) {
 
   // Mobile menu drawer toggle state
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+
+  // Authentication State
+  const [token, setToken] = useState(() => apiClient.getToken())
+  const [currentUser, setCurrentUser] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ai_tracker_user')
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
+  const [authLoading, setAuthLoading] = useState(true)
+
+  // Verifikasi sesi pengguna aktif ke Backend Laravel saat load
+  useEffect(() => {
+    const verifyAuth = async () => {
+      const currentToken = apiClient.getToken()
+      if (!currentToken) {
+        setAuthLoading(false)
+        return
+      }
+
+      try {
+        const response = await authService.getMe()
+        if (response && response.user) {
+          setCurrentUser(response.user)
+          localStorage.setItem('ai_tracker_user', JSON.stringify(response.user))
+
+          // Sinkronisasi data preferensi dari database profil jika ada
+          if (response.user.profile) {
+            const p = response.user.profile
+            setPreferencesState((prev) => ({
+              ...prev,
+              targetRole: p.target_role || prev.targetRole,
+              location: p.location || prev.location,
+              workType: p.work_type || prev.workType,
+              jobType: p.job_type || prev.jobType
+            }))
+
+            // Pulihkan status CV dari database jika di local belum ada
+            if (p.cv_path && !storageService.getCvFile()) {
+              const restoredCv = {
+                name: p.cv_path,
+                size: 1420000,
+                type: 'application/pdf',
+                uploadedAt: new Date().toISOString()
+              }
+              setCvFile(restoredCv)
+            }
+          }
+        }
+      } catch {
+        // Jika token invalid/expired, reset auth
+        apiClient.setToken('')
+        setToken('')
+        setCurrentUser(null)
+        localStorage.removeItem('ai_tracker_user')
+      } finally {
+        setAuthLoading(false)
+      }
+    }
+
+    verifyAuth()
+  }, [])
+
+  const loginUser = (authData) => {
+    setToken(authData.token)
+    setCurrentUser(authData.user)
+    apiClient.setToken(authData.token)
+    localStorage.setItem('ai_tracker_user', JSON.stringify(authData.user))
+
+    if (authData.user.profile) {
+      const p = authData.user.profile
+      if (p.target_role) {
+        setPreferencesState((prev) => ({
+          ...prev,
+          targetRole: p.target_role,
+          location: p.location || prev.location,
+          workType: p.work_type || prev.workType,
+          jobType: p.job_type || prev.jobType
+        }))
+      }
+    }
+  }
+
+  const logoutUser = async () => {
+    await authService.logout()
+    setToken('')
+    setCurrentUser(null)
+    localStorage.removeItem('ai_tracker_user')
+    setActiveView('dashboard')
+  }
+
+  const completeOnboarding = (updatedUser) => {
+    setCurrentUser(updatedUser)
+    localStorage.setItem('ai_tracker_user', JSON.stringify(updatedUser))
+
+    if (updatedUser.profile) {
+      const p = updatedUser.profile
+      setPreferencesState((prev) => ({
+        ...prev,
+        targetRole: p.target_role || prev.targetRole,
+        location: p.location || prev.location,
+        workType: p.work_type || prev.workType,
+        jobType: p.job_type || prev.jobType
+      }))
+    }
+  }
 
   const toggleSidebarExpanded = () => {
     setIsSidebarExpanded((prev) => !prev)
@@ -61,10 +171,21 @@ export function AppProvider({ children }) {
     )
   })
 
-  // Step 3: Selected CV file (held locally in memory)
-  const [cvFile, setCvFile] = useState(null)
+  // Step 3: Selected CV file (tersimpan di localStorage agar tetap ada saat refresh)
+  const [cvFile, setCvFileState] = useState(() => {
+    return storageService.getCvFile() || null
+  })
 
-  // Step 4: Extracted profile data (simulated)
+  const setCvFile = (fileData) => {
+    setCvFileState(fileData)
+    if (fileData) {
+      storageService.saveCvFile(fileData)
+    } else {
+      storageService.removeCvFile()
+    }
+  }
+
+  // Step 4: Extracted profile data (tersimpan di localStorage)
   const [extractedProfile, setExtractedProfileState] = useState(() => {
     return storageService.getExtractedProfile() || null
   })
@@ -166,12 +287,24 @@ export function AppProvider({ children }) {
   // Reset the flow back to start
   const resetFlow = () => {
     setCvFile(null)
+    updateExtractedProfile(null)
     setActiveView('preferences')
   }
 
   return (
     <AppContext.Provider
       value={{
+        // Auth
+        currentUser,
+        token,
+        authLoading,
+        isAuthenticated: !!token && !!currentUser,
+        isOnboarded: currentUser ? Boolean(currentUser.is_onboarded) : false,
+        loginUser,
+        logoutUser,
+        completeOnboarding,
+
+        // Navigation
         activeView,
         setActiveView,
         isSidebarExpanded,
@@ -179,6 +312,8 @@ export function AppProvider({ children }) {
         isMobileMenuOpen,
         toggleMobileMenu,
         closeMobileMenu,
+
+        // Data & Preferences
         preferences,
         updatePreferences,
         cvFile,

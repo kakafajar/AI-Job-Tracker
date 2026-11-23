@@ -5,6 +5,8 @@ export function Sidebar() {
   const {
     activeView,
     setActiveView,
+    cvFile,
+    extractedProfile,
     trackedJobs,
     resetFlow,
     isSidebarExpanded,
@@ -12,6 +14,8 @@ export function Sidebar() {
     isMobileMenuOpen,
     closeMobileMenu
   } = useApp()
+
+  const hasCv = Boolean(cvFile && extractedProfile)
 
   // Close mobile drawer on Escape key press
   useEffect(() => {
@@ -123,37 +127,59 @@ export function Sidebar() {
             {isSidebarExpanded && <span className="sidebar-btn-label">Unggah CV</span>}
           </button>
 
-          {/* Profile Review */}
+          {/* Profile Review - Terkunci jika CV belum diunggah & dianalisis */}
           <button
             type="button"
             className={`sidebar-btn ${activeView === 'review' ? 'active' : ''}`}
-            onClick={() => setActiveView('review')}
-            title="Tinjau Profil & Keahlian"
+            onClick={() => {
+              if (!hasCv) {
+                setActiveView('upload')
+              } else {
+                setActiveView('review')
+              }
+            }}
+            title={hasCv ? 'Tinjau Profil & Keahlian' : 'Kunci: Unggah CV terlebih dahulu'}
             aria-label="Tinjau Profil & Keahlian"
+            style={{ opacity: !hasCv ? 0.5 : 1, cursor: !hasCv ? 'not-allowed' : 'pointer' }}
           >
             <svg className="sidebar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            {isSidebarExpanded && <span className="sidebar-btn-label">Tinjau Profil</span>}
+            {isSidebarExpanded && (
+              <span className="sidebar-btn-label">
+                Tinjau Profil {!hasCv && '🔒'}
+              </span>
+            )}
           </button>
         </div>
 
         {/* Middle Floating Island */}
         <div className="sidebar-island">
-          {/* Recommendations */}
+          {/* Recommendations - Terkunci jika CV belum diunggah & dianalisis */}
           <button
             type="button"
             className={`sidebar-btn ${activeView === 'recommendations' ? 'active' : ''}`}
-            onClick={() => setActiveView('recommendations')}
-            title="Rekomendasi Lowongan Kerja"
+            onClick={() => {
+              if (!hasCv) {
+                setActiveView('upload')
+              } else {
+                setActiveView('recommendations')
+              }
+            }}
+            title={hasCv ? 'Rekomendasi Lowongan Kerja' : 'Kunci: Unggah CV terlebih dahulu'}
             aria-label="Rekomendasi Lowongan Kerja"
+            style={{ opacity: !hasCv ? 0.5 : 1, cursor: !hasCv ? 'not-allowed' : 'pointer' }}
           >
             <svg className="sidebar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
               <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
             </svg>
-            {isSidebarExpanded && <span className="sidebar-btn-label">Rekomendasi</span>}
+            {isSidebarExpanded && (
+              <span className="sidebar-btn-label">
+                Rekomendasi {!hasCv && '🔒'}
+              </span>
+            )}
           </button>
 
           {/* Job Tracker */}
@@ -321,13 +347,20 @@ export function Sidebar() {
           <button
             type="button"
             className={`mobile-nav-link ${activeView === 'review' ? 'active' : ''}`}
-            onClick={() => setActiveView('review')}
+            onClick={() => {
+              if (!hasCv) {
+                setActiveView('upload')
+              } else {
+                setActiveView('review')
+              }
+            }}
+            style={{ opacity: !hasCv ? 0.5 : 1 }}
           >
             <svg className="sidebar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
               <circle cx="12" cy="7" r="4" />
             </svg>
-            <span>Tinjau Profil & Skill</span>
+            <span>Tinjau Profil {!hasCv && '(Kunci: Isi CV Dulu)'}</span>
           </button>
 
           <div className="mobile-nav-group-title" style={{ marginTop: '16px' }}>Pencarian & Pelacakan</div>
@@ -335,13 +368,20 @@ export function Sidebar() {
           <button
             type="button"
             className={`mobile-nav-link ${activeView === 'recommendations' ? 'active' : ''}`}
-            onClick={() => setActiveView('recommendations')}
+            onClick={() => {
+              if (!hasCv) {
+                setActiveView('upload')
+              } else {
+                setActiveView('recommendations')
+              }
+            }}
+            style={{ opacity: !hasCv ? 0.5 : 1 }}
           >
             <svg className="sidebar-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
               <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
               <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" />
             </svg>
-            <span>Rekomendasi Lowongan</span>
+            <span>Rekomendasi Lowongan {!hasCv && '(Kunci: Isi CV Dulu)'}</span>
           </button>
 
           <button

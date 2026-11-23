@@ -5,7 +5,7 @@ import { JobCard } from '../components/JobCard'
 import { jobService } from '../services/jobService'
 
 export function RecommendationsPage() {
-  const { preferences, extractedProfile, setActiveView } = useApp()
+  const { preferences, cvFile, extractedProfile, setActiveView } = useApp()
 
   const [isLoading, setIsLoading] = useState(true)
   const [errorMessage, setErrorMessage] = useState('')
@@ -48,6 +48,54 @@ export function RecommendationsPage() {
     setLocationFilter('')
     setWorkTypeFilter('All')
     setSortBy('score-desc')
+  }
+
+  // Kunci halaman Rekomendasi jika CV belum diunggah & dianalisis
+  if (!extractedProfile || !cvFile) {
+    return (
+      <div style={{ width: '100%' }}>
+        <StepProgress />
+
+        <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--color-primary-light)',
+              color: 'var(--color-primary)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px'
+            }}
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </div>
+
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-text)', marginBottom: '8px' }}>
+            Rekomendasi Lowongan Terkunci
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', maxWidth: '480px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+            Rekomendasi lowongan kerja disinkronkan langsung dari hasil ekstraksi keahlian CV Anda. Silakan unggah dokumen CV terlebih dahulu agar sistem dapat mencocokkan kriteria lowongan yang relevan.
+          </p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setActiveView('upload')}
+              style={{ fontWeight: 600, padding: '10px 24px' }}
+            >
+              Unggah Dokumen CV Sekarang →
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (

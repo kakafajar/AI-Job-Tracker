@@ -8,10 +8,41 @@ import { ProfileReviewPage } from './pages/ProfileReviewPage'
 import { RecommendationsPage } from './pages/RecommendationsPage'
 import { JobTrackerPage } from './pages/JobTrackerPage'
 import { LandingPage } from './pages/LandingPage'
+import { AuthPage } from './pages/AuthPage'
+import { OnboardingPage } from './pages/OnboardingPage'
 
-function AppLayout() {
-  const { activeView } = useApp()
+function AppContent() {
+  const { authLoading, isAuthenticated, isOnboarded, activeView, cvFile, extractedProfile } = useApp()
 
+  const hasCv = Boolean(cvFile && extractedProfile)
+
+  if (authLoading) {
+    return (
+      <div
+        style={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: 'var(--color-bg)'
+        }}
+      >
+        <div className="spinner" aria-hidden="true" style={{ width: '36px', height: '36px' }} />
+      </div>
+    )
+  }
+
+  // 1. Jika pengguna belum login, arahkan ke Login/Register
+  if (!isAuthenticated) {
+    return <AuthPage />
+  }
+
+  // 2. Jika pengguna baru & belum mengisi kuesioner profil, arahkan ke Onboarding
+  if (!isOnboarded) {
+    return <OnboardingPage />
+  }
+
+  // 3. Jika pengguna sudah login & profil sudah lengkap, masuk ke Dashboard
   const renderActiveView = () => {
     switch (activeView) {
       case 'dashboard':
@@ -21,9 +52,9 @@ function AppLayout() {
       case 'upload':
         return <UploadCvPage />
       case 'review':
-        return <ProfileReviewPage />
+        return hasCv ? <ProfileReviewPage /> : <UploadCvPage />
       case 'recommendations':
-        return <RecommendationsPage />
+        return hasCv ? <RecommendationsPage /> : <UploadCvPage />
       case 'tracker':
         return <JobTrackerPage />
       case 'landing':
@@ -35,7 +66,7 @@ function AppLayout() {
 
   return (
     <div className="dashboard-layout">
-      {/* Floating Island Sidebar matching reference */}
+      {/* Floating Island Sidebar */}
       <Sidebar />
 
       {/* Main Dashboard Canvas */}
@@ -50,7 +81,7 @@ function AppLayout() {
 export default function App() {
   return (
     <AppProvider>
-      <AppLayout />
+      <AppContent />
     </AppProvider>
   )
 }

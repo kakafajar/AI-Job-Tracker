@@ -2,6 +2,7 @@ import { useState, useRef } from 'react'
 import { useApp } from '../context/AppContext'
 import { StepProgress } from '../components/StepProgress'
 import { jobService } from '../services/jobService'
+import { authService } from '../services/authService'
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024 // 5 MB
 const ALLOWED_EXTENSIONS = ['.pdf', '.docx', '.doc']
@@ -121,12 +122,21 @@ export function UploadCvPage() {
     setErrorMessage('')
 
     try {
-      // Runs simulated analysis without calling external endpoints
+      // Jika ada file fisik, coba simpan ke backend Laravel
+      if (cvFile.rawFile) {
+        try {
+          await authService.uploadCvFile(cvFile.rawFile)
+        } catch {
+          // Tetap lanjutkan analisis lokal jika backend belum online
+        }
+      }
+
+      // Jalankan analisis CV
       const parsedResult = await jobService.analyzeCv(cvFile, preferences)
       updateExtractedProfile(parsedResult)
       setActiveView('review')
     } catch {
-      setErrorMessage('Terjadi kendala saat menganalisis CV demo. Silakan coba lagi.')
+      setErrorMessage('Terjadi kendala saat menganalisis CV. Silakan coba lagi.')
     } finally {
       setIsAnalyzing(false)
     }

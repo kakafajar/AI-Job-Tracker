@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -22,6 +21,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'api_token',
+        'is_onboarded',
     ];
 
     /**
@@ -32,6 +33,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'api_token',
     ];
 
     /**
@@ -44,6 +46,23 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'is_onboarded' => 'boolean',
         ];
+    }
+
+    /**
+     * Relasi ke profil pengguna
+     */
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class);
+    }
+
+    /**
+     * Relasi ke lowongan yang dilacak oleh pengguna
+     */
+    public function trackedJobs()
+    {
+        return $this->hasMany(TrackedJob::class);
     }
 }

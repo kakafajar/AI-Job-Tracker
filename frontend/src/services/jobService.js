@@ -1,27 +1,20 @@
 import { DEMO_JOBS } from '../data/demoJobs'
+import { apiClient } from './apiClient'
 
 /**
  * Service layer for CV analysis and job search
- * Currently operates in simulation mode with demo data.
- * Ready for future Laravel backend API integration.
+ * Mengambil data lowongan langsung dari backend Laravel database,
+ * dengan fallback aman ke demo data lokal jika backend belum berjalan.
  */
-
-// Placeholder for future Laravel API URL
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
-
 export const jobService = {
   /**
    * Simulates parsing a CV file and extracting relevant candidate profile
-   * Future integration target: POST `${API_BASE_URL}/cv/analyze` with FormData
    */
   async analyzeCv(file, preferences = {}) {
-    // Simulated processing latency
-    await new Promise((resolve) => setTimeout(resolve, 1400))
+    await new Promise((resolve) => setTimeout(resolve, 1200))
 
-    // Fallback title derived from preferences or file name
     const preferredRole = preferences.targetRole?.trim() || 'Frontend Web Developer'
-    
-    // Simulated extracted skills based on modern web development profile
+
     const baseSkills = [
       'React',
       'JavaScript (ES6+)',
@@ -47,44 +40,54 @@ export const jobService = {
   },
 
   /**
-   * Simulates fetching recommended jobs based on preferences and profile skills
-   * Future integration target: GET `${API_BASE_URL}/jobs/recommendations`
+   * Mengambil rekomendasi lowongan kerja dari Backend Laravel Database
    */
   async getRecommendedJobs(filters = {}) {
-    // Simulated network delay
-    await new Promise((resolve) => setTimeout(resolve, 700))
+    const { location = '', workType = 'All', sortBy = 'score-desc' } = filters
 
-    let results = [...DEMO_JOBS]
+    try {
+      // Coba request ke Backend Laravel
+      const params = new URLSearchParams()
+      if (location) params.append('location', location)
+      if (workType && workType !== 'All') params.append('workType', workType)
+      if (sortBy) params.append('sortBy', sortBy)
 
-    // Filter by work type if provided
-    if (filters.workType && filters.workType !== 'All') {
-      results = results.filter(
-        (job) => job.workType.toLowerCase() === filters.workType.toLowerCase()
+      const response = await apiClient.get(`/jobs/recommendations?${params.toString()}`)
+      if (response && response.jobs) {
+        return {
+          total: response.jobs.length,
+          jobs: response.jobs,
+          isBackendConnected: true
+        }
+      }
+    } catch {
+      // Fallback ke data lokal jika koneksi backend belum aktif
+    }
+
+    // Fallback logic
+    let filtered = [...DEMO_JOBS]
+
+    if (location && location.trim() !== '') {
+      const q = location.toLowerCase().trim()
+      filtered = filtered.filter(
+        (job) => job.location.toLowerCase().includes(q) || job.workType.toLowerCase() === 'remote'
       )
     }
 
-    // Filter by location if specified
-    if (filters.location && filters.location.trim() !== '') {
-      const q = filters.location.toLowerCase().trim()
-      results = results.filter(
-        (job) =>
-          job.location.toLowerCase().includes(q) ||
-          job.workType.toLowerCase().includes(q)
-      )
+    if (workType && workType !== 'All') {
+      filtered = filtered.filter((job) => job.workType === workType)
     }
 
-    // Sorting by matchScore descending or ascending
-    if (filters.sortBy === 'score-asc') {
-      results.sort((a, b) => a.matchScore - b.matchScore)
+    if (sortBy === 'score-asc') {
+      filtered.sort((a, b) => a.matchScore - b.matchScore)
     } else {
-      // Default: score highest first
-      results.sort((a, b) => b.matchScore - a.matchScore)
+      filtered.sort((a, b) => b.matchScore - a.matchScore)
     }
 
     return {
-      isSimulated: true,
-      total: results.length,
-      jobs: results
+      total: filtered.length,
+      jobs: filtered,
+      isBackendConnected: false
     }
   }
 }

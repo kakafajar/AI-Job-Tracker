@@ -1,10 +1,32 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useApp } from '../context/AppContext'
 import { DEMO_JOBS } from '../data/demoJobs'
+import { jobService } from '../services/jobService'
 
 export function DashboardOverview() {
-  const { preferences, cvFile, trackedJobs, setActiveView } = useApp()
+  const { currentUser, preferences, cvFile, trackedJobs, setActiveView } = useApp()
   const [chartPeriod, setChartPeriod] = useState('monthly')
+  const [backendJobs, setBackendJobs] = useState([])
+  const [isBackendConnected, setIsBackendConnected] = useState(false)
+
+  // Ambil data lowongan sinkron dari database Laravel
+  useEffect(() => {
+    let isMounted = true
+    const fetchDashboardJobs = async () => {
+      try {
+        const res = await jobService.getRecommendedJobs()
+        if (isMounted && res && res.jobs) {
+          setBackendJobs(res.jobs)
+          setIsBackendConnected(Boolean(res.isBackendConnected))
+        }
+      } catch {
+        // Fallback otomatis tertangani
+      }
+    }
+
+    fetchDashboardJobs()
+    return () => { isMounted = false }
+  }, [])
 
   // Sample activity data for the custom rounded bar chart
   const monthlyChartData = [
@@ -27,15 +49,23 @@ export function DashboardOverview() {
 
   const activeChart = chartPeriod === 'monthly' ? monthlyChartData : weeklyChartData
 
-  // Display tracked jobs or fallback to demo items if tracker is empty
-  const displayedRecentJobs = trackedJobs.length > 0 ? trackedJobs.slice(0, 4) : DEMO_JOBS.slice(0, 3)
+  // Tampilkan data lowongan dari database atau tracker
+  const displayedRecentJobs = trackedJobs.length > 0
+    ? trackedJobs.slice(0, 4)
+    : (backendJobs.length > 0 ? backendJobs.slice(0, 4) : DEMO_JOBS.slice(0, 4))
+
+  // Data profil user tersinkron dari Database Onboarding
+  const targetRole = currentUser?.profile?.target_role || preferences.targetRole || 'Frontend React Developer'
+  const workType = currentUser?.profile?.work_type || preferences.workType || 'Remote'
+  const cvDocName = cvFile?.name || currentUser?.profile?.cv_path || null
+  const userName = currentUser?.name || 'Fajar'
 
   // Company avatar color generator for modern look
   const getAvatarBg = (index) => {
     const colors = [
-      { bg: '#fce7f3', text: '#db2777' }, // Pink/Dribbble vibe
-      { bg: '#e0f2fe', text: '#0284c7' }, // Blue/Google vibe
-      { bg: '#fef3c7', text: '#d97706' }, // Amber/Amazon vibe
+      { bg: '#fce7f3', text: '#db2777' }, // Pink vibe
+      { bg: '#e0f2fe', text: '#0284c7' }, // Blue vibe
+      { bg: '#fef3c7', text: '#d97706' }, // Amber vibe
       { bg: '#e8f5ee', text: '#0f764a' }  // Green vibe
     ]
     return colors[index % colors.length]
@@ -50,7 +80,7 @@ export function DashboardOverview() {
           <div className="dash-card-header">
             <div>
               <h2 className="dash-card-title">Target Karier & CV</h2>
-              <p className="dash-card-subtitle">Ringkasan profil pencarian kerja</p>
+              <p className="dash-card-subtitle">Profil tersinkron dengan database</p>
             </div>
 
             <button
@@ -68,26 +98,34 @@ export function DashboardOverview() {
           <div className="visa-style-card">
             <div className="card-top-row">
               <span className="card-brand-logo">AI TRACKER</span>
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-                <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-                <line x1="12" y1="20" x2="12.01" y2="20" />
-              </svg>
+              <span style={{ fontSize: '11px', fontWeight: 600, opacity: 0.9 }}>{userName}</span>
             </div>
 
             <span className="card-label-small">Posisi yang Ditargetkan</span>
             <div className="card-target-role">
-              {preferences.targetRole?.trim() || 'Frontend React Developer'}
+              {targetRole}
             </div>
 
             <div className="card-footer-row">
               <div>
                 <span style={{ fontSize: '10px', opacity: 0.8, display: 'block' }}>DOKUMEN CV</span>
-                <span>{cvFile ? cvFile.name.slice(0, 18) + '...' : 'Demo Resume Aktif'}</span>
+                {cvDocName ? (
+                  <span title={cvDocName}>
+                    {cvDocName.length > 20 ? cvDocName.slice(0, 18) + '...' : cvDocName}
+                  </span>
+                ) : (
+                  <span
+                    onClick={() => setActiveView('upload')}
+                    style={{ textDecoration: 'underline', cursor: 'pointer', opacity: 0.95 }}
+                    title="Klik untuk mengunggah CV"
+                  >
+                    Belum Diunggah
+                  </span>
+                )}
               </div>
               <div style={{ textAlign: 'right' }}>
                 <span style={{ fontSize: '10px', opacity: 0.8, display: 'block' }}>TIPE KERJA</span>
-                <span>{preferences.workType ? preferences.workType.toUpperCase() : 'REMOTE'}</span>
+                <span>{workType.toUpperCase()}</span>
               </div>
             </div>
           </div>
@@ -177,20 +215,22 @@ export function DashboardOverview() {
       <section className="dash-card" aria-label="Pelacakan Lamaran Terkini">
         <div className="dash-card-header">
           <div>
-            <h2 className="dash-card-title">Riwayat & Status Lamaran Kerja</h2>
+            <h2 className="dash-card-title">Riwayat & Rekomendasi Lowongan</h2>
             <p className="dash-card-subtitle">
               {trackedJobs.length > 0
-                ? `${trackedJobs.length} lowongan tersimpan di Job Tracker lokal`
-                : 'Menampilkan data demo simulasi (Belum ada lowongan tersimpan)'}
+                ? `${trackedJobs.length} lowongan tersimpan di Job Tracker`
+                : (isBackendConnected
+                  ? 'Sinkron langsung dari database backend Laravel'
+                  : 'Menampilkan data lowongan rekomendasi aktif')}
             </p>
           </div>
 
           <button
             type="button"
             className="card-arrow-btn"
-            onClick={() => setActiveView('tracker')}
-            title="Buka Halaman Job Tracker Lengkap"
-            aria-label="Buka Halaman Job Tracker Lengkap"
+            onClick={() => setActiveView('recommendations')}
+            title="Buka Rekomendasi Lowongan Lengkap"
+            aria-label="Buka Rekomendasi Lowongan Lengkap"
           >
             ↗
           </button>
@@ -211,8 +251,8 @@ export function DashboardOverview() {
             <tbody>
               {displayedRecentJobs.map((job, idx) => {
                 const avatarStyle = getAvatarBg(idx)
-                const currentStatus = job.status || 'Disimpan'
-                const displayDate = job.postedDate || '19 Nov 2026'
+                const currentStatus = job.status || 'Tersedia'
+                const displayDate = job.postedDate || 'Baru saja'
 
                 return (
                   <tr key={job.id || idx}>
@@ -264,7 +304,9 @@ export function DashboardOverview() {
         {/* Bottom CTA within card */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '18px', paddingTop: '16px', borderTop: '1px solid var(--color-border)', flexWrap: 'wrap', gap: '10px' }}>
           <span style={{ fontSize: '13px', color: 'var(--color-text-subtle)' }}>
-            Butuh rekomendasi baru sesuai keahlian CV Anda?
+            {!cvDocName
+              ? 'Anda belum mengunggah dokumen CV untuk analisis kecocokan mendalam.'
+              : 'Profil dan CV Anda siap untuk dicocokkan dengan lowongan kerja baru.'}
           </span>
 
           <div style={{ display: 'flex', gap: '10px' }}>
@@ -273,7 +315,7 @@ export function DashboardOverview() {
               className="btn btn-sm btn-secondary"
               onClick={() => setActiveView('upload')}
             >
-              Unggah CV Baru
+              {cvDocName ? 'Unggah CV Baru' : 'Unggah CV Sekarang'}
             </button>
             <button
               type="button"

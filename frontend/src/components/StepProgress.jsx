@@ -11,13 +11,14 @@ export function StepProgress() {
   const { activeView, setActiveView, cvFile, extractedProfile } = useApp()
 
   const currentIndex = STEPS.findIndex((s) => s.key === activeView)
+  const hasCv = Boolean(cvFile && extractedProfile)
 
-  // Determine if a step is accessible
+  // Determine if a step is accessible - Tahap 3 & 4 hanya aktif jika CV sudah diunggah & dianalisis
   const isStepAccessible = (stepKey) => {
     if (stepKey === 'preferences') return true
     if (stepKey === 'upload') return true
-    if (stepKey === 'review') return Boolean(cvFile || extractedProfile)
-    if (stepKey === 'recommendations') return Boolean(extractedProfile)
+    if (stepKey === 'review') return hasCv
+    if (stepKey === 'recommendations') return hasCv
     return false
   }
 
@@ -45,7 +46,7 @@ export function StepProgress() {
                 }}
                 disabled={!accessible}
                 aria-current={isActive ? 'step' : undefined}
-                style={{ width: '100%', textAlign: 'left', cursor: accessible ? 'pointer' : 'not-allowed' }}
+                style={{ width: '100%', textAlign: 'left', cursor: accessible ? 'pointer' : 'not-allowed', opacity: accessible ? 1 : 0.55 }}
               >
                 <span className="step-number" aria-hidden="true">
                   {isCompleted ? '✓' : index + 1}

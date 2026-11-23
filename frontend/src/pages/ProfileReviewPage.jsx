@@ -7,13 +7,55 @@ export function ProfileReviewPage() {
   const [newSkillInput, setNewSkillInput] = useState('')
   const [inputError, setInputError] = useState('')
 
-  // Fallback profile if user refreshed directly into review step
-  const profile = extractedProfile || {
-    matchedRole: 'Frontend Web Developer',
-    experienceLevel: '1 - 3 Tahun Pengalaman',
-    experienceSummary: 'Pengalaman membangun aplikasi web responsif menggunakan React dan integrasi REST API.',
-    skills: ['React', 'JavaScript', 'HTML/CSS', 'Tailwind CSS', 'Git', 'REST API']
+  // Jika CV belum diunggah atau belum dianalisis, kunci halaman ini
+  if (!extractedProfile) {
+    return (
+      <div style={{ width: '100%' }}>
+        <StepProgress />
+
+        <div className="card" style={{ textAlign: 'center', padding: '48px 24px' }}>
+          <div
+            style={{
+              width: '56px',
+              height: '56px',
+              borderRadius: '50%',
+              backgroundColor: 'var(--color-primary-light)',
+              color: 'var(--color-primary)',
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              marginBottom: '16px'
+            }}
+          >
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+              <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+            </svg>
+          </div>
+
+          <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--color-text)', marginBottom: '8px' }}>
+            Dokumen CV Belum Dianalisis
+          </h2>
+          <p style={{ fontSize: '14px', color: 'var(--color-text-muted)', maxWidth: '480px', margin: '0 auto 24px', lineHeight: 1.6 }}>
+            Tahap Tinjau Profil hanya dapat dibuka setelah Anda mengunggah file CV. Sistem akan mengekstraksi riwayat keahlian dan pengalaman kerja dari dokumen tersebut.
+          </p>
+
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '12px' }}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setActiveView('upload')}
+              style={{ fontWeight: 600, padding: '10px 24px' }}
+            >
+              Unggah Dokumen CV Sekarang →
+            </button>
+          </div>
+        </div>
+      </div>
+    )
   }
+
+  const profile = extractedProfile
 
   const handleAddSkill = (e) => {
     e.preventDefault()
